@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("CHATBOT_API_KEY"))
 
 SYSTEM_PROMPT = """You are an expert rock climbing coach specializing in personal training plans. your ONLY function is to create structured rock climbing training plans.
 
@@ -83,7 +83,7 @@ with gr.Accordion(" What to enter to get a plan generated", open=False):
 
     with gr.Row(): 
       msg_box= gr.Textbox(
-        placeholder="tell me your grade, what youre struggling with, and how many weeks you want your plan to be."
+        placeholder="tell me your grade, what youre struggling with, and how many weeks you want your plan to be.",
         show_label=False,
         scale=5,
         lines=2,

@@ -72,11 +72,33 @@ with gr.Accordion(" What to enter to get a plan generated", open=False):
     """
     )
    
-   with gr.Column(elem_classes_="chat-container"):
+   def chat(user_message: str, history: list) -> tuple[str, list]:
+    """Send a message and return the assistant's reply + updated history."""
+
+    # Build the messages list for the API call
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+    for human, assistant in history:
+        messages.append({"role": "user", "content": human})
+        messages.append({"role": "assistant", "content": assistant})
+
+    messages.append({"role": "user", "content": user_message})
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,
+        temperature=0.7,
+        max_tokens=2000,
+    )
+
+    reply = response.choices[0].message.content
+    history.append((user_message, reply))
+    return "", history
+   
+   with gr.Column(elem_classes="chat-container"):
     chatbot = gr.Chatbot( 
       label="Climbing Trainer", 
-      heihgt=520, 
-      bubble_full_width=False, 
+      height=520, 
       show_label=False, 
 
     )
@@ -86,9 +108,6 @@ with gr.Accordion(" What to enter to get a plan generated", open=False):
         placeholder="tell me your grade, what youre struggling with, and how many weeks you want your plan to be.",
         show_label=False,
         scale=5,
-        lines=2,
-        max_lines=4,
-        autofocus=True,
       )
 
       send_btn = gr.Button("send", variant ="primary", scale=1, min_width=90)
@@ -116,3 +135,4 @@ clear_btn.click(fn=lambda: ([], ""), outputs=[chatbot, msg_box])
 
 if __name__ == "__main__": 
    demo.launch(share=False)
+

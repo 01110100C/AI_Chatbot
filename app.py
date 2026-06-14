@@ -25,19 +25,24 @@ Always be specific and include safety measures."""
 
 def chat(user_message: str, history: list) -> tuple[str, list]:
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    for human, assistant in history:
-        messages.append({"role": "user", "content": human})
-        messages.append({"role": "assistant", "content": assistant})
+    for item in history: 
+        if isinstance(item, dict): 
+            messages.append({"role": "user", "content": human})
+        else: 
+            human, assistant = item
+            messages.append({"role": "user", "content": human})
+            messages.append({"role": "assistant", "content": assistant})
+
     messages.append({"role": "user", "content": user_message})
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=messages,
-        temperature=0.7,
-        max_tokens=2000,
+
+    response = client.chat.completions.create( 
+        model="gpt-4o", 
+        messages=messages, 
+        temperature=0.7, 
+        max_toxens=2000, 
     )
+
     reply = response.choices[0].message.content
-    history.append((user_message, reply))
-    return "", history
 
 
 with gr.Blocks(
@@ -45,7 +50,7 @@ with gr.Blocks(
         primary_hue="blue",
         secondary_hue="stone",
         neutral_hue="slate",
-        font=gr.themes.GoogleFont("Inter"),  # "sensei" is not a valid Google Font
+        font=gr.themes.GoogleFont("Inter"),
     ),
     title="Rock Climbing Personal Trainer",
     css="""
@@ -104,7 +109,6 @@ with gr.Blocks(
             label="Example prompts — click one to try",
         )
 
-        # ✅ Event wiring — inside the with block
         send_btn.click(fn=chat, inputs=[msg_box, chatbot], outputs=[msg_box, chatbot])
         msg_box.submit(fn=chat, inputs=[msg_box, chatbot], outputs=[msg_box, chatbot])
         clear_btn.click(fn=lambda: ([], ""), outputs=[chatbot, msg_box])
